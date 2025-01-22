@@ -1,0 +1,22 @@
+[server]
+hosts = 0.0.0.0:5232
+
+[auth]
+type = htpasswd
+htpasswd_filename = /config/users
+htpasswd_encryption = plain
+
+[rights]
+type = owner_only
+
+# Allow public read-only access to free/busy info
+[rights:calendar-freebusy]
+user: .*
+collection: .*
+permissions: f
+
+# Authenticated access for full calendar details
+[rights:calendar-full]
+user: .+
+collection: {user}/.*
+permissions: rw

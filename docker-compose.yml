@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  radicale:
+    image: tomsquest/docker-radicale
+    container_name: ${CALENDAR_NAME:-calendar}
+    restart: unless-stopped
+    ports:
+      - "${CALENDAR_PORT:-5232}:5232"
+    volumes:
+      - ${DATA_PATH:-./data}:/data
+      - ${CONFIG_PATH:-./config}:/config
+    environment:
+      - RADICALE_USERS_FILE=/config/users
+      - TZ=${TIMEZONE:-UTC}
+      - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE:-local}
+      - HOSTNAME=${HOSTNAME:-localhost}
+      - ALLOWED_IPS=${ALLOWED_IPS:-0.0.0.0/0}
+      - ENABLE_PUBLIC_FULL=${ENABLE_PUBLIC_FULL:-false}
+      - ENABLE_PUBLIC_FREEBUSY=${ENABLE_PUBLIC_FREEBUSY:-true}
+      - ENABLE_PRIVATE_FULL=${ENABLE_PRIVATE_FULL:-true}
+      - ENABLE_PRIVATE_FREEBUSY=${ENABLE_PRIVATE_FREEBUSY:-true}
+      - LETSENCRYPT_TYPE=${LETSENCRYPT_TYPE:-test}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - LETSENCRYPT_AGREE_TOS=${LETSENCRYPT_AGREE_TOS:-false}
+      - REGENERATE_PUBLIC_LINKS=${REGENERATE_PUBLIC_LINKS:-false}
+    networks:
+      - calendar-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.calendar.rule=Host(`${HOSTNAME:-localhost}`)"
+      - "traefik.http.services.calendar.loadbalancer.server.port=${CALENDAR_PORT:-5232}"
+
+networks:
+  calendar-net:
+    name: calendar-network
